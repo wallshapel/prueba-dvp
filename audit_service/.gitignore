@@ -1,0 +1,114 @@
+#--------------------------------------------------
+# 🧩 Archivos y carpetas de configuración local
+#--------------------------------------------------
+# Configuraciones específicas del entorno
+/config/master.key
+/config/credentials.yml.enc
+/config/initializers/secret_token.rb
+
+# Archivos de entorno (.env, credenciales, etc.)
+.env
+.env.*       # 👈 agregado: variables de entorno Docker o locales
+
+#--------------------------------------------------
+# 🧰 Dependencias y compilados
+#--------------------------------------------------
+/.bundle/
+/vendor/bundle/
+/node_modules/
+/yarn-error.log
+/npm-debug.log
+/yarn-debug.log*
+/.yarn-integrity
+
+#--------------------------------------------------
+# 💾 Archivos generados por Rails y caching
+#--------------------------------------------------
+/log/*
+/tmp/*
+!/log/.keep
+!/tmp/.keep
+
+# PIDs de servidores
+/pids/*
+!/pids/.keep
+
+# Caches y backups
+/cache/*
+!/cache/.keep
+
+# Archivos de subida temporales
+/storage/*
+!/storage/.keep
+
+#--------------------------------------------------
+# 🧪 Tests
+#--------------------------------------------------
+/coverage/      # SimpleCov, si lo usas para medir cobertura
+/spec/examples.txt
+
+#--------------------------------------------------
+# ⚙️ Archivos autogenerados o del sistema
+#--------------------------------------------------
+/public/assets
+/public/packs
+/public/packs-test
+/public/uploads
+/public/system
+/public/storage
+
+# Archivos compilados por Rails (Webpacker o importmaps)
+public/packs
+public/assets
+tmp/assets
+
+#--------------------------------------------------
+# 💻 IDEs y editores
+#--------------------------------------------------
+# VSCode
+.vscode/
+/.idea/
+/*.iml
+.vs/
+
+#--------------------------------------------------
+# 🐳 Docker y contenedores
+#--------------------------------------------------
+# Volúmenes o archivos creados dentro de contenedores
+docker-compose.override.yml  # 👈 agregado: configs locales
+docker-compose.dev.yml       # 👈 agregado: versiones de desarrollo
+docker-compose.debug.yml     # 👈 agregado: debugging local
+
+# Datos persistentes de DB o Redis (por si llegas a usar montajes locales)
+/postgres-data/               # 👈 agregado: ej. si usaras PostgreSQL local
+/mongo-data/                  # 👈 agregado: si usas MongoDB localmente
+/oracle-data/                 # 👈 agregado: si usas Oracle con volúmenes locales
+
+#--------------------------------------------------
+# 🧱 Builds y binarios
+#--------------------------------------------------
+/bin/*
+!/bin/rails
+!/bin/rake
+!/bin/setup
+!/bin/spring
+!/bin/yarn
+!/bin/dev
+
+#--------------------------------------------------
+# 🧹 Otros
+#--------------------------------------------------
+*.swp
+*.bak
+*.tmp
+*.old
+*.orig
+
+#--------------------------------------------------
+# 🧩 Específico para tu estructura (audit_service)
+#--------------------------------------------------
+/coverage/                   # 👈 agregado: si corres tests con SimpleCov
+/logs/                       # 👈 agregado: logs específicos del microservicio
+/tmp/                        # 👈 agregado: archivos temporales internos
+/.byebug_history             # 👈 agregado: historial del depurador
+/.bundle/config               # 👈 agregado: configuración de bundle local

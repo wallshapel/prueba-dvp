@@ -1,0 +1,27 @@
+# config/mongoid.yml
+development:
+  clients:
+    default:
+      database: audit_service_dev
+      hosts:
+        - localhost:27017
+      options:
+        server_selection_timeout: 5
+        user: root
+        password: Legato1218*
+  options:
+    use_activesupport_time_zone: true
+
+test:
+  clients:
+    default:
+      database: audit_service_test
+      hosts:
+        - localhost:27017
+
+production:
+  clients:
+    default:
+      database: audit_service_prod
+      hosts:
+        - localhost:27017

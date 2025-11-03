@@ -1,0 +1,47 @@
+# Build results
+bin/
+obj/
+out/
+*.exe
+*.dll
+*.log
+*.cache
+*.pdb
+
+# User-specific files
+.vs/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Package restore
+packages/
+.nuget/
+*.nupkg
+
+# Test results
+TestResult*/
+*.trx
+*.coverage
+*.coveragexml
+
+# Environment and secrets
+.env
+*.env
+appsettings.Development.json
+appsettings.Local.json
+
+# Database and migrations (optional)
+Migrations/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Tooling
+*.swp
+*.bak
+*.tmp
+*.old

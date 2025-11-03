@@ -1,0 +1,100 @@
+services:
+  # ==========================
+  #  Oracle Database
+  # ==========================
+  oracle-db-dvp:
+    image: gvenzl/oracle-xe
+    container_name: oracle-db-dvp
+    environment:
+      ORACLE_PASSWORD: "TuContrasena123*"
+    ports:
+      - "1521:1521"
+    volumes:
+      - oracle-volume-dvp:/opt/oracle/oradata
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo 'SELECT 1 FROM DUAL;' | sqlplus -s system/TuContrasena123*@//localhost:1521/XEPDB1 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+    networks:
+      - dvp-network
+
+  # ==========================
+  #  MongoDB
+  # ==========================
+  mongodb-dvp:
+    image: mongo:latest
+    container_name: mongodb-dvp
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: "root"
+      MONGO_INITDB_ROOT_PASSWORD: "TuContrasena123*"
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-dvp:/data/db
+    networks:
+      - dvp-network
+
+  # ==========================
+  #  Audit Service (Rails)
+  # ==========================
+  audit-service-dvp:
+    build:
+      context: ./audit_service
+      dockerfile: Dockerfile
+    container_name: audit-service-dvp
+    environment:
+      RAILS_ENV: production
+      MONGO_HOST: mongodb-dvp
+      MONGO_DB: audit_service_prod
+      MONGO_USER: root
+      MONGO_PASSWORD: "TuContrasena123*"
+    depends_on:
+      - mongodb-dvp
+    ports:
+      - "3000:3000"
+    networks:
+      - dvp-network
+
+  # ==========================
+  #  Billing Service (.NET)
+  # ==========================
+  billing-service-dvp:
+    build:
+      context: ./BillingService/BillingService
+      dockerfile: ../Dockerfile
+    container_name: billing-service-dvp
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Production"
+      ENABLE_SWAGGER: "true"
+      ORACLE_HOST: "oracle-db-dvp"
+      ORACLE_PORT: "1521"
+      ORACLE_SERVICE: "XEPDB1"
+      ORACLE_USER: "system"
+      ORACLE_PASSWORD: "TuContrasena123*"
+    depends_on:
+      oracle-db-dvp:
+        condition: service_healthy
+      audit-service-dvp:
+        condition: service_started
+    ports:
+      - "8080:8080"
+    networks:
+      - dvp-network
+    command: >
+      sh -c "
+        echo '⏳ Waiting for Oracle PDB to register...' &&
+        sleep 60 &&
+        dotnet BillingService.WebApi.dll  
+      "
+
+# ==========================
+#  Volumes & Networks
+# ==========================
+volumes:
+  oracle-volume-dvp:
+  mongodb-dvp:
+
+networks:
+  dvp-network:
+    driver: bridge
