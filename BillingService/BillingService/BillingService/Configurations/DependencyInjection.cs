@@ -17,8 +17,8 @@ namespace BillingService.WebApi.Configurations
             var oracleHost = Environment.GetEnvironmentVariable("ORACLE_HOST") ?? "localhost";
             var oraclePort = Environment.GetEnvironmentVariable("ORACLE_PORT") ?? "1521";
             var oracleService = Environment.GetEnvironmentVariable("ORACLE_SERVICE") ?? "XEPDB1";
-            var oracleUser = Environment.GetEnvironmentVariable("ORACLE_USER") ?? "system";
-            var oraclePassword = Environment.GetEnvironmentVariable("ORACLE_PASSWORD") ?? "TuContrasena123*";
+            var oracleUser = Environment.GetEnvironmentVariable("ORACLE_USER") ?? "";
+            var oraclePassword = Environment.GetEnvironmentVariable("ORACLE_PASSWORD") ?? "";
 
             var oracleConnection = $"User Id={oracleUser};Password={oraclePassword};Data Source={oracleHost}:{oraclePort}/{oracleService}";
 

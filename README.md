@@ -194,23 +194,15 @@ oracle-db-dvp      | DATABASE IS READY TO USE!
 oracle-db-dvp      | #########################
 ```
 
-⚠️ `Importante antes de seguir:` El comando siguiente del paso 4, creará el contenedor del microservicio de facturación y clientes, pero por defecto guardará dichas tablas en el esquema `SYSTEM`. Por facilidad se guardarán en `SYSTEM`, pero no es recomendable. Si prefiere un esquema nuevo entonces deberá crearlo manualmente por ejemplo desde DBeaver creando una nueva conexión con `usuario:` system `contraseña:` TuContrasena123* o cualquier otra, y `base de datos:` XEPDB1. Entonces desde esa conexión puede crear un nuevo usuario con permisos por ejemplo así:
-
-```sql
-CREATE USER dvp IDENTIFIED BY "TuContrasena123*";
-GRANT CREATE SESSION, CONNECT, RESOURCE, CREATE TABLE, CREATE SEQUENCE TO dvp;
-ALTER USER dvp QUOTA UNLIMITED ON USERS;
-```
-
-Luego intente crear una nueva conexión con: `usuario:` dvp `contraseña:` TuContrasena123* y `base de datos:` XEPDB1
-Si todo marcha bien, entonces edite el docker-compose.yml en el servicio de billing-service-dvp y ajuste las variables de entorno `ORACLE_USER` y `ORACLE_PASSWORD` con valores que haya usado en la sentencias de creación de usuario. Para este ejemplo se usó como ya vimos `dvp` y `TuContrasena123*`
+⚠️ `Importante antes de seguir:` El comando siguiente del paso 4, creará el contenedor del microservicio de facturación y clientes, y generará las migraciones. Posteriormente, si desea, podrá verlo desde un cliente como DBeaver con los datos de conexión siguientes:
+- Usuario/Esquema: `dvp`
+- contraseña: `TuContrasena123*`
+- Base de datos/Servicio: `XEPDB1`
 
 4. Una vez aparezca el mensaje, abrir **otra consola** en la misma ruta del proyecto y ejecutar:
 ```bash
 docker compose up billing-service-dvp
 ```
-
-
 
 Los contenedores levantarán:
 - Oracle XE
