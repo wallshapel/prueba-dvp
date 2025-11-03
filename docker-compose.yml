@@ -12,10 +12,10 @@ services:
     volumes:
       - oracle-volume-dvp:/opt/oracle/oradata
     healthcheck:
-      test: ["CMD", "bash", "-c", "echo 'SELECT 1 FROM DUAL;' | sqlplus -s system/TuContrasena123*@//localhost:1521/XEPDB1 || exit 1"]
-      interval: 30s
+      test: ["CMD-SHELL", "echo 'exit' | sqlplus -s system/TuContrasena123*@//oracle-db-dvp:1521/XEPDB1 || exit 1"]
+      interval: 20s
       timeout: 10s
-      retries: 10
+      retries: 15
     networks:
       - dvp-network
 
