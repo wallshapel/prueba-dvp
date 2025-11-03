@@ -174,15 +174,29 @@ Contiene los controladores, middlewares, pipeline de configuración, inyección 
 - Conexión configurada por variables de entorno (en `docker-compose.yml`)
 - Swagger habilitado en: [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html)
 
-### 🔌 Ejecución de la aplicación
+## 🚀 Ejecución del proyecto
 
-Solo es necesario clonar el repositorio y ejecutar:
+1. Clonar el repositorio:
 ```bash
-docker compose up
+git clone https://github.com/wallshapel/prueba-dvp.git
+cd prueba-dvp
 ```
-o
+
+2. Levantar las bases de datos y servicios iniciales:
 ```bash
-docker compose up -d
+docker compose up oracle-db-dvp mongodb-dvp audit-service-dvp
+```
+
+3. Esperar en los logs hasta que aparezca el siguiente mensaje:
+```
+                              ######################### 
+oracle-db-dvp      | DATABASE IS READY TO USE!  
+oracle-db-dvp      | #########################
+```
+
+4. Una vez aparezca el mensaje, abrir **otra consola** en la misma ruta del proyecto y ejecutar:
+```bash
+docker compose up billing-service-dvp
 ```
 
 Los contenedores levantarán:
@@ -191,7 +205,11 @@ Los contenedores levantarán:
 - AuditService (Rails)
 - BillingService (.NET)
 
-Por defecto, el usuario es **Administrador**, ya que el sistema no posee autenticación de usuarios.
+Por defecto en auditoría el usuario es **Admin**, ya que el sistema no posee autenticación de usuarios ni gestión de roles.
+
+5. Acceder a los servicios:
+   - Swagger (.NET): [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html)
+   - Rails Audit API: [http://localhost:3000](http://localhost:3000) # Esta url es solo la base y no mostrará nada en un navegador. Ver Ejemplo de consulta por ID de factura para obtener el endpoint completo
 
 ---
 
@@ -338,24 +356,28 @@ status, success, message, timestamp, data
 
 ---
 
-## 🚀 Ejecución del proyecto
 
-1. Clonar el repositorio:
+
+## 🧪 Ejecución de Tests
+
+Para ejecutar las pruebas es necesario encontrarse en un **entorno de desarrollo**.
+
+### ✨ AuditService (Ruby on Rails)
+Desde la raíz del proyecto:
 ```bash
-git clone https://github.com/wallshapel/prueba-dvp.git
-cd prueba-dvp
+rails test
 ```
 
-2. Ejecutar:
+### 🔧 BillingService (.NET 8)
+Desde el directorio de la solución:
 ```bash
-docker compose up -d
+dotnet test
 ```
 
-3. Acceder a los servicios:
-   - Swagger (.NET): [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html)
-   - Rails Audit API: [http://localhost:3000](http://localhost:3000)
+Ambos conjuntos de pruebas validan la integridad de los componentes principales y las interacciones entre capas.
 
 ---
+
 
 ## 🧠 Reflexiones finales
 

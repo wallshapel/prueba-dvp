@@ -81,12 +81,6 @@ services:
       - "8080:8080"
     networks:
       - dvp-network
-    command: >
-      sh -c "
-        echo '⏳ Waiting for Oracle PDB to register...' &&
-        sleep 60 &&
-        dotnet BillingService.WebApi.dll  
-      "
 
 # ==========================
 #  Volumes & Networks
