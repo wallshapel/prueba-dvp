@@ -189,13 +189,15 @@ docker compose up oracle-db-dvp mongodb-dvp audit-service-dvp
 
 3. Esperar en los logs hasta que aparezca el siguiente mensaje:
 ```
-                              ######################### 
+                     ######################### 
 oracle-db-dvp      | DATABASE IS READY TO USE!  
 oracle-db-dvp      | #########################
 ```
 
+(Se recomienda no usar el flag -d para ver los logs en tiempo real. Si prefiere usar -d, entonces tendrá que verificar si aparece el mensaje con el comando `docker logs <nombre del contenedor>`)
+
 ⚠️ `Importante antes de seguir:` El comando siguiente del paso 4, creará el contenedor del microservicio de facturación y clientes, y generará las migraciones. Posteriormente, si desea, podrá verlo desde un cliente como DBeaver con los datos de conexión siguientes:
-- Usuario/Esquema: `dvp`
+- Usuario/Esquema: `system` (Se recomienda crear otro usuario/esquema. Tiene que darle todos los privilegios necesarios. Posteriormente pasar los valores como en la sección de variables den entorno del servicio billing-service-dvp en el docker-compose.yml)
 - contraseña: `TuContrasena123*`
 - Base de datos/Servicio: `XEPDB1`
 
