@@ -367,21 +367,24 @@ status, success, message, timestamp, data
 
 ## 🧪 Ejecución de Tests
 
-Para ejecutar las pruebas es necesario encontrarse en un **entorno de desarrollo**.
+Los Tests se encuentran en un entorno dockerizado y aislado de los contenedores del programa principal; para que no interfieran con los datos en producción y por buena práctica.
 
 ### ✨ AuditService (Ruby on Rails)
-Desde la raíz del proyecto:
+Desde la raíz más alta:
 ```bash
-rails test
+docker compose build --no-cache audit-service-test
+docker compose run --rm audit-service-test
 ```
 
 ### 🔧 BillingService (.NET 8)
-Desde el directorio de la solución:
+Desde la raíz más alta:
 ```bash
-dotnet test
+docker compose build --no-cache billing-service-test
+docker compose run --rm billing-service-test
 ```
 
-Ambos conjuntos de pruebas validan la integridad de los componentes principales y las interacciones entre capas.
+En el MS de auditoría se testean controladores, servicios y repositorios
+En el Ms de facturación se testea solo la capa de dominio como indica el pdf. Habría sido más interesante exigir la capa de Aplicación donde reside toda la lógica de negocio
 
 ---
 

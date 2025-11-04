@@ -83,12 +83,62 @@ services:
     networks:
       - dvp-network
 
+  # ==========================
+  #  MongoDB (Test)
+  # ==========================
+  mongodb-test:
+    image: mongo:latest
+    container_name: mongodb-test
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: "root"
+      MONGO_INITDB_ROOT_PASSWORD: "TuContrasena123*"
+    ports:
+      - "27018:27017"  # puerto distinto al de prod
+    volumes:
+      - mongodb-test:/data/db
+    networks:
+      - dvp-network
+
+  # ==========================
+  #  Audit Service (Test)
+  # ==========================
+  audit-service-test:
+    build:
+      context: ./audit_service
+      dockerfile: Dockerfile.test
+    container_name: audit-service-test
+    environment:
+      RAILS_ENV: test
+      SECRET_KEY_BASE: "clave-ficticia-para-tests"
+      MONGO_HOST: mongodb-test
+      MONGO_DB: audit_service_test
+      MONGO_USER: root
+      MONGO_PASSWORD: "TuContrasena123*"
+    depends_on:
+      - mongodb-test
+    networks:
+      - dvp-network
+
+  # ==========================
+  #  Billing Service (Test)
+  # ==========================
+  billing-service-test:
+    build:
+      context: ./BillingService
+      dockerfile: Dockerfile.test
+    container_name: billing-service-test
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Test"
+    networks:
+      - dvp-network
+
 # ==========================
 #  Volumes & Networks
 # ==========================
 volumes:
   oracle-volume-dvp:
   mongodb-dvp:
+  mongodb-test:
 
 networks:
   dvp-network:

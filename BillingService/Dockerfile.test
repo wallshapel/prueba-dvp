@@ -1,0 +1,18 @@
+# ============================
+#  Dockerfile.test (.NET 8)
+# ============================
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS test
+
+WORKDIR /src
+
+# Copy the entire context (starting from BillingService/)
+COPY . .
+
+# Restore dependencies using the solution file
+RUN dotnet restore BillingService/BillingService.sln
+
+# Run the Domain project tests
+WORKDIR /src/BillingService/BillingService.Domain.Tests
+CMD ["dotnet", "test", "BillingService.Domain.Tests.csproj", "--logger:trx"]
+

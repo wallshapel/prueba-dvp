@@ -1,0 +1,29 @@
+# ============================
+#  Dockerfile.test
+# ============================
+
+FROM ruby:3.3.4
+
+# Install system dependencies
+RUN apt-get update -qq && \
+    apt-get install -y build-essential libpq-dev nodejs npm && \
+    npm install -g yarn && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Copy Gemfiles first for caching
+COPY Gemfile Gemfile.lock ./
+
+# Install all gems (including test & development)
+RUN bundle install
+
+# Copy the app
+COPY . .
+
+# Set environment for test
+ENV RAILS_ENV=test
+
+# Command for running the test suite
+CMD ["bash", "-c", "bundle exec rails test"]

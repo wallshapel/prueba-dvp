@@ -1,6 +1,5 @@
 # /test/repositories/mongo_audit_event_repository_test.rb
 require "test_helper"
-require_relative "../../../app/repositories/mongo_audit_event_repository"
 
 class MongoAuditEventRepositoryTest < Minitest::Test
   def setup
