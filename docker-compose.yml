@@ -16,27 +16,6 @@ services:
       interval: 20s
       timeout: 10s
       retries: 15
-    command: >
-      bash -c '
-        /opt/oracle/runOracle.sh &
-        pid=$$!;
-        echo "⏳ Waiting for Oracle to be ready...";
-        until echo "exit" | sqlplus -s system/TuContrasena123*@//localhost:1521/XEPDB1 >/dev/null 2>&1; do
-          sleep 10;
-        done;
-        echo "✅ Oracle is ready, creating user dvp...";
-        echo "
-          ALTER SESSION SET CONTAINER = XEPDB1;
-          CREATE USER dvp IDENTIFIED BY \"TuContrasena123*\" DEFAULT TABLESPACE USERS TEMPORARY TABLESPACE TEMP QUOTA UNLIMITED ON USERS;
-          GRANT CREATE SESSION, CONNECT, RESOURCE, CREATE TABLE, CREATE SEQUENCE, CREATE VIEW TO dvp;
-          GRANT UNLIMITED TABLESPACE TO dvp;
-          GRANT CREATE TRIGGER TO dvp;
-          GRANT CREATE PROCEDURE TO dvp;
-          GRANT CREATE TYPE TO dvp;
-        " | sqlplus -s system/TuContrasena123*@//localhost:1521/XEPDB1;
-        echo "✅ User dvp created and privileges granted.";
-        wait $pid;
-      '
     networks:
       - dvp-network
 
@@ -66,6 +45,7 @@ services:
     container_name: audit-service-dvp
     environment:
       RAILS_ENV: production
+      SECRET_KEY_BASE: "206482f27ca7201e1870c1d63308bb6a1d7f5a74a6fb0eb6f8c8d5fbc5f0d0ff9480af8653bc011ef3eb96e66c917ccb8565bcd5939b113a34646f5be51d63a1"
       MONGO_HOST: mongodb-dvp
       MONGO_DB: audit_service_prod
       MONGO_USER: root
@@ -91,7 +71,7 @@ services:
       ORACLE_HOST: "oracle-db-dvp"
       ORACLE_PORT: "1521"
       ORACLE_SERVICE: "XEPDB1"
-      ORACLE_USER: "dvp"
+      ORACLE_USER: "system"
       ORACLE_PASSWORD: "TuContrasena123*"
     depends_on:
       oracle-db-dvp:
