@@ -71,8 +71,8 @@ services:
       ORACLE_HOST: "oracle-db-dvp"
       ORACLE_PORT: "1521"
       ORACLE_SERVICE: "XEPDB1"
-      ORACLE_USER: "system"
-      ORACLE_PASSWORD: "TuContrasena123*"
+      ORACLE_USER: "dvp"
+      ORACLE_PASSWORD: "TuContrasena123"
     depends_on:
       oracle-db-dvp:
         condition: service_healthy

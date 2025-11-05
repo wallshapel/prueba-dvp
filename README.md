@@ -1,27 +1,41 @@
-# 🧾 Guía de Implementación y Documentación del Proyecto de Facturación Electrónica
+# 🧱 Proyecto DVP – Microservicios Audit y Billing
 
-**Autor:** ABEL CAMILO YI MARTÍNEZ
-**Repositorio:** [https://github.com/wallshapel/prueba-dvp](https://github.com/wallshapel/prueba-dvp)  
-**Empresa solicitante:** Double V Partners NYX  
-**Fecha:** Noviembre 2025  
+## 📘 Descripción General
+
+Este proyecto implementa una arquitectura basada en microservicios completamente dockerizada.  
+Consta de dos servicios principales:
+
+- **Audit Service (Rails)** → Se conecta a MongoDB.  
+- **Billing Service (.NET Core)** → Se conecta a Oracle.
+
+Ambas bases de datos están dockerizadas, y el entorno incluye servicios adicionales para pruebas automatizadas.
+
+El propósito es disponer de un entorno de desarrollo y despliegue **totalmente automatizado y reproducible**, donde cada microservicio y su base de datos puedan levantarse y comunicarse de manera independiente o coordinada.
 
 ---
 
-## 🌐 Contexto del Problema
+## ⚙️ Requisitos Previos
 
-La empresa **FactuMarket S.A.** busca modernizar su sistema de facturación electrónica. El sistema anterior era monolítico, lento y con poca trazabilidad. Se requiere ahora una arquitectura moderna basada en **microservicios**, que permita:
+Antes de ejecutar el proyecto, asegúrate de tener instalado:
 
-- Registrar y gestionar clientes.
-- Emitir facturas electrónicas.
-- Registrar eventos de auditoría.
-- Mantener independencia, escalabilidad y bajo acoplamiento entre servicios.
+- 🐳 **Docker Engine** (versión reciente recomendada)  
+- 🧩 **Docker Compose**  
+- 💻 Un cliente de base de datos (recomendado **DBeaver**) para inspeccionar las tablas.
 
-Con esto, se busca resolver los principales problemas identificados:
+---
 
-1. Demoras en la emisión de facturas.  
-2. Duplicación de información.  
-3. Falta de trazabilidad.  
-4. Escasa flexibilidad tecnológica.
+## ⚠️ Verificación de Puertos Disponibles
+
+Antes de levantar los contenedores, asegúrate de que los siguientes puertos **no estén siendo utilizados** por otros servicios en tu máquina:
+
+| Servicio | Puerto | Descripción |
+|-----------|--------|-------------|
+| Oracle XE | `1521` | Puerto por defecto del servicio Oracle Database |
+| MongoDB   | `27017` | Puerto de conexión de MongoDB |
+| Rails (Audit) | `3000` | Puerto de la API del microservicio Rails |
+| .NET (Billing) | `8080` | Puerto de la API del microservicio .NET |
+
+Si alguno de ellos está ocupado, libera el puerto o actualiza el archivo `docker-compose.yml` antes de ejecutar el script.
 
 ---
 
@@ -160,10 +174,10 @@ Sin dependencias hacia capas externas.
 
 #### 2. ⚙️ **Application**
 Contiene la lógica de negocio, DTOs, validadores y servicios.  
-Define los contratos que deben cumplir las capas inferiores.
+Define la implementación de los contratos que deben cumplir la capa de Dominio.
 
 #### 3. 🗄️ **Infrastructure**
-Implementa los repositorios (Oracle con EF Core), clientes HTTP (para AuditService), y los contextos de persistencia.
+Implementa los repositorios (Oracle con EF Core), clientes HTTP (para AuditService), migraciones y los contextos de persistencia.
 
 #### 4. 🌍 **WebApi**
 Contiene los controladores, middlewares, pipeline de configuración, inyección de dependencias, validaciones y variables de entorno.  
@@ -174,51 +188,84 @@ Contiene los controladores, middlewares, pipeline de configuración, inyección 
 - Conexión configurada por variables de entorno (en `docker-compose.yml`)
 - Swagger habilitado en: [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html)
 
-## 🚀 Ejecución del proyecto
+## 🧩 Diagrama de Arquitectura (texto descriptivo)
 
-1. Clonar el repositorio:
-```bash
-git clone https://github.com/wallshapel/prueba-dvp.git
-cd prueba-dvp
 ```
-
-2. Levantar las bases de datos y servicios iniciales:
-```bash
-docker compose up oracle-db-dvp mongodb-dvp audit-service-dvp
+                ┌──────────────────────────┐
+                │      Frontend / API      │
+                └────────────┬─────────────┘
+                             │ REST
+                             ▼
+        ┌────────────────────────────┐
+        │     BillingService (.NET)  │
+        │  - Domain / Application    │
+        │  - Infrastructure / WebApi │
+        └───────────┬────────────────┘
+                    │ HTTP (AuditClient)
+                    ▼
+        ┌────────────────────────────┐
+        │     AuditService (Rails)   │
+        │  - MVC + DTO + Repositorios│
+        └───────────┬────────────────┘
+                    │
+     ┌──────────────┴───────────────┐
+     │                              │
+┌────────────┐              ┌────────────┐
+│  Oracle DB │              │ MongoDB DB │
+│ Facturas & │              │ Eventos de │
+│ Clientes   │              │ Auditoría  │
+└────────────┘              └────────────┘
 ```
-
-3. Esperar en los logs hasta que aparezca el siguiente mensaje:
-```
-                     ######################### 
-oracle-db-dvp      | DATABASE IS READY TO USE!  
-oracle-db-dvp      | #########################
-```
-
-(Se recomienda no usar el flag -d para ver los logs en tiempo real. Si prefiere usar -d, entonces tendrá que verificar si aparece el mensaje con el comando `docker logs <nombre del contenedor>`)
-
-⚠️ `Importante antes de seguir:` El comando siguiente del paso 4, creará el contenedor del microservicio de facturación y clientes, y generará las migraciones. Posteriormente, si desea, podrá verlo desde un cliente como DBeaver con los datos de conexión siguientes:
-- Usuario/Esquema: `system` (Se recomienda crear otro usuario/esquema. Tiene que darle todos los privilegios necesarios. Posteriormente pasar los valores como en la sección de variables den entorno del servicio billing-service-dvp en el docker-compose.yml)
-- contraseña: `TuContrasena123*`
-- Base de datos/Servicio: `XEPDB1`
-
-4. Una vez aparezca el mensaje, abrir **otra consola** en la misma ruta del proyecto y ejecutar:
-```bash
-docker compose up billing-service-dvp
-```
-
-Los contenedores levantarán:
-- Oracle XE
-- MongoDB
-- AuditService (Rails)
-- BillingService (.NET)
-
-Por defecto en auditoría el usuario es **Admin**, ya que el sistema no posee autenticación de usuarios ni gestión de roles.
-
-5. Acceder a los servicios:
-   - Swagger (.NET): [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html)
-   - Rails Audit API: [http://localhost:3000](http://localhost:3000) # Esta url es solo la base y no mostrará nada en un navegador. Ver Ejemplo de consulta por ID de factura para obtener el endpoint completo
 
 ---
+
+## 🚀 Ejecución del Proyecto
+
+Toda la lógica de inicialización y dependencias se encuentra automatizada en el script **`run_all.sh`**.  
+Este script:
+
+1. Construye las imágenes necesarias de Oracle, MongoDB y Rails.  
+2. Inicia los contenedores base.  
+3. Espera automáticamente hasta que Oracle esté completamente listo. Puede demorar entre 3 o 5 minutos, así que no hay que creer que se queda colgado. 
+4. Crea el usuario de aplicación `dvp` con la contraseña `TuContrasena123`.  
+5. Asigna todos los permisos requeridos.  
+6. Finalmente, levanta el microservicio `.NET` (`billing-service-dvp`).  
+
+De esta forma, **todo el entorno se levanta con un solo comando**.
+
+### ▶️ En Linux o macOS
+
+Abre una terminal en la raíz del proyecto (donde está el `docker-compose.yml`) y ejecuta:
+
+```bash
+chmod +x run_all.sh
+./run_all.sh
+```
+
+El script se encargará del resto.  
+Podrás observar los mensajes de progreso y logs en tiempo real directamente desde la terminal.
+
+---
+
+### 🪟 En Windows (Docker Desktop o clientes equivalentes)
+
+Si utilizas **Docker Desktop**, **Rancher Desktop** o cualquier otro cliente que provea una **consola Linux**,  
+simplemente abre dicha consola desde la interfaz del cliente y navega a la raíz del proyecto, por ejemplo:
+
+```bash
+cd /mnt/c/Proyectos/prueba-dvp
+chmod +x run_all.sh
+./run_all.sh
+```
+
+Docker Desktop y herramientas similares ofrecen un entorno Linux interno, por lo que el script funcionará exactamente igual que en sistemas Linux nativos.  
+No se requiere ninguna versión especial ni adaptación para Windows.
+
+---
+
+## 🔗 Acceder a los servicios:
+   - Swagger (.NET): [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html) verás los endpoints que expone el ms de facturación. También puedes consumirlos con Postman u otro.
+   - Rails Audit API: [http://localhost:3000](http://localhost:3000) Esta URL es solo la base y no mostrará nada en un navegador. Ver Ejemplo de consulta por ID de factura para obtener el endpoint completo. Requiere de Postman u otro.
 
 ## 📡 Endpoints del BillingService (.NET)
 
@@ -332,87 +379,81 @@ status, success, message, timestamp, data
 
 ---
 
-## 🧩 Diagrama de Arquitectura (texto descriptivo)
+## 🧰 Conexión a la Base de Datos
 
-```
-                ┌──────────────────────────┐
-                │      Frontend / API      │
-                └────────────┬─────────────┘
-                             │ REST
-                             ▼
-        ┌────────────────────────────┐
-        │     BillingService (.NET)  │
-        │  - Domain / Application    │
-        │  - Infrastructure / WebApi │
-        └───────────┬────────────────┘
-                    │ HTTP (AuditClient)
-                    ▼
-        ┌────────────────────────────┐
-        │     AuditService (Rails)   │
-        │  - MVC + DTO + Repositorios│
-        └───────────┬────────────────┘
-                    │
-     ┌──────────────┴───────────────┐
-     │                              │
-┌────────────┐              ┌────────────┐
-│  Oracle DB │              │ MongoDB DB │
-│ Facturas & │              │ Eventos de │
-│ Clientes   │              │ Auditoría  │
-└────────────┘              └────────────┘
-```
+Una vez el entorno esté en funcionamiento, puedes conectarte a las bases de datos para inspeccionar las tablas creadas por los microservicios.
 
----
+### 🔸 Oracle (Billing Service)
 
+Puedes usar **DBeaver** o cualquier cliente SQL compatible para conectarte a Oracle con los siguientes datos:
 
+| Parámetro | Valor |
+|------------|-------|
+| **Usuario** | `dvp` |
+| **Contraseña** | `TuContrasena123` |
+| **Base de datos (service name)** | `XEPDB1` |
+| **Host** | `localhost` |
+| **Puerto** | `1521` |
 
-## 🧪 Ejecución de Tests
+Las tablas principales disponibles serán:  
+- `CUSTOMERS`  
+- `INVOICES`
 
-Los Tests se encuentran en un entorno dockerizado y aislado de los contenedores del programa principal; para que no interfieran con los datos en producción y por buena práctica.
+### 🔸 MongoDB (Audit Service)
 
-### ✨ AuditService (Ruby on Rails)
-Desde la raíz más alta:
-```bash
-docker compose build --no-cache audit-service-test
-docker compose run --rm audit-service-test
-```
+Para inspeccionar los datos de auditoría, conecta con:
 
-### 🔧 BillingService (.NET 8)
-Desde la raíz más alta:
-```bash
-docker compose build --no-cache billing-service-test
-docker compose run --rm billing-service-test
-```
+| Parámetro | Valor |
+|------------|-------|
+| **Usuario** | `root` |
+| **Contraseña** | `TuContrasena123*` |
+| **Host** | `localhost` |
+| **Puerto** | `27017` |
+| **Base de datos** | `audit_service_prod` |
 
-En el MS de auditoría se testean controladores, servicios y repositorios
-En el Ms de facturación se testea solo la capa de dominio como indica el pdf. Habría sido más interesante exigir la capa de Aplicación donde reside toda la lógica de negocio
+no se creará ninguna colección hasta que no se cree un log de auditoría desde el ms de facturación o manualmente usando postman.
 
 ---
 
+## 🧩 Servicios Incluidos
 
-## 🧠 Reflexiones finales
+El archivo `docker-compose.yml` define todos los servicios necesarios:
 
-✨ Este proyecto combina **tecnologías modernas** (Ruby on Rails, .NET 8, Docker, Oracle, MongoDB) bajo **principios arquitectónicos sólidos**: bajo acoplamiento, alta cohesión y responsabilidad bien definida.
+- **oracle-db-dvp** → Base de datos Oracle XE 21c.  
+- **mongodb-dvp** → Base de datos MongoDB.  
+- **audit-service-dvp** → Microservicio en Ruby on Rails (producción).  
+- **billing-service-dvp** → Microservicio en .NET Core (producción).  
+- Servicios equivalentes para pruebas (`*-test`).
 
-🧩 Se emplearon patrones **DTO, Repositorio, Validador, Middleware e Inyección de Dependencias**, logrando una estructura limpia, mantenible y extensible.
+Cada servicio se encuentra dentro de la misma red `dvp-network` para permitir comunicación interna.
 
-💬 Al no incluir autenticación, se asume que todo usuario tiene permisos administrativos, lo cual simplifica la prueba sin comprometer la arquitectura.
+---
 
-⚡ En resumen, el sistema cumple todos los requerimientos de la prueba:
+## 🧪 Tests Automatizados
+
+El entorno incluye contenedores dedicados a pruebas unitarias y de integración:  
+- `audit-service-test` (Rails)  
+- `billing-service-test` (.NET)
+
+Estos pueden levantarse individualmente si se requiere validación aislada:
+
+```bash
+docker compose up audit-service-test
+docker compose up billing-service-test
+```
+
+Los Tests de Rails incluyen tests en el controlador, en la implementación de servicios y en la implementación de repositorios. En el caso de .Net la prueba exige tests sobre la capa de dominio y esos fueron los test realizados. Habría sido interesante que fueran exigidos sobre la capa de aplicación ya que allí se aloja la lógica de negocio.
+
+---
+
+## 🧠 Notas Finales
+
+- El script `run_all.sh` automatiza completamente la creación del usuario Oracle, la espera de readiness y el despliegue coordinado de microservicios.  
+- Si en algún momento deseas modificar la contraseña o el usuario, recuerda actualizar tanto el script como las variables de entorno en el `docker-compose.yml`.  
+- Al no incluir autenticación, se asume que todo usuario tiene permisos administrativos, lo cual simplifica la prueba sin comprometer la arquitectura.
 - Microservicios independientes.
 - Persistencia híbrida (Oracle + MongoDB).
 - Principios de Clean Architecture y MVC.
-- Se usan UUID seguros, confiables en ambos Microservicios.
-- Contenedores Docker con ejecución inmediata.
+- Se usan UUID seguros, aumentando la confiabilidad y seguridad del sistema en ambos Microservicios.
+- Contenedores Docker con ejecución inmediata y automátizada.
 - API REST funcional con auditoría integrada.
-
----
-
-## ⚠️ IMPORTANTE
-
-El docker compose crea absolutamente todo lo necesario, incluyendo los servidores de bases de datos. De modo que si ya cuenta con motores instalados en su sistema, debe habilitar y tener libres los siguientes puertos:
-
-- 8080: .NET CORE, Swagger
-- 1521: Oracle
-- 3000: RAILS, auditoría
-- 27017: MongoDB
-
